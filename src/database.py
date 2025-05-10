@@ -17,6 +17,9 @@ class Database:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
+            email TEXT,
+            full_name TEXT,
+            theme TEXT DEFAULT 'light',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         ''')
@@ -50,13 +53,15 @@ class Database:
         conn.commit()
         conn.close()
 
-    def register_user(self, username, password):
+    def register_user(self, username, password, email="", full_name=""):
         try:
             conn = sqlite3.connect(self.db_name)
             cursor = conn.cursor()
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)',
-                         (username, hashed.decode('utf-8')))
+            cursor.execute('''
+            INSERT INTO users (username, password, email, full_name)
+            VALUES (?, ?, ?, ?)
+            ''', (username, hashed.decode('utf-8'), email, full_name))
             conn.commit()
             return True
         except sqlite3.IntegrityError:
@@ -82,6 +87,56 @@ class Database:
         result = cursor.fetchone()
         conn.close()
         return result[0] if result else None
+
+    def get_user_info(self, user_id):
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT username, email, full_name, theme
+        FROM users WHERE id = ?
+        ''', (user_id,))
+        result = cursor.fetchone()
+        conn.close()
+        if result:
+            return {
+                'username': result[0],
+                'email': result[1],
+                'full_name': result[2],
+                'theme': result[3]
+            }
+        return None
+
+    def update_user_info(self, user_id, email="", full_name=""):
+        try:
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
+            cursor.execute('''
+            UPDATE users
+            SET email = ?, full_name = ?
+            WHERE id = ?
+            ''', (email, full_name, user_id))
+            conn.commit()
+            return True
+        except sqlite3.Error:
+            return False
+        finally:
+            conn.close()
+
+    def update_theme(self, user_id, theme):
+        try:
+            conn = sqlite3.connect(self.db_name)
+            cursor = conn.cursor()
+            cursor.execute('''
+            UPDATE users
+            SET theme = ?
+            WHERE id = ?
+            ''', (theme, user_id))
+            conn.commit()
+            return True
+        except sqlite3.Error:
+            return False
+        finally:
+            conn.close()
 
     def add_income(self, user_id, category, amount, description=""):
         conn = sqlite3.connect(self.db_name)
