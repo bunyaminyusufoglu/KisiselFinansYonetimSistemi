@@ -124,36 +124,8 @@ class FinanceApp:
         
         ttk.Label(frame, text="Gider Raporu", font=("Helvetica", 16)).grid(row=0, column=0, columnspan=2, pady=10)
         
-        # Tarih aralığı seçimi
-        ttk.Label(frame, text="Başlangıç Tarihi:").grid(row=1, column=0, pady=5)
-        self.start_date = ttk.Entry(frame)
-        self.start_date.grid(row=1, column=1, pady=5)
-        
-        ttk.Label(frame, text="Bitiş Tarihi:").grid(row=2, column=0, pady=5)
-        self.end_date = ttk.Entry(frame)
-        self.end_date.grid(row=2, column=1, pady=5)
-        
-        ttk.Button(frame, text="Raporu Göster", command=self.display_expense_report).grid(row=3, column=0, columnspan=2, pady=10)
-        ttk.Button(frame, text="Geri Dön", command=self.show_main_menu).grid(row=4, column=0, columnspan=2)
-
-    def save_expense(self):
         try:
-            category = self.expense_category.get()
-            amount = float(self.expense_amount.get())
-            description = self.expense_description.get()
-            
-            self.expense_manager.add_expense(self.current_user, category, amount, description)
-            messagebox.showinfo("Başarılı", "Gider başarıyla eklendi!")
-            self.show_main_menu()
-        except ValueError as e:
-            messagebox.showerror("Hata", str(e))
-
-    def display_expense_report(self):
-        try:
-            start_date = self.start_date.get() or None
-            end_date = self.end_date.get() or None
-            
-            report = self.expense_manager.get_expense_summary(self.current_user, start_date, end_date)
+            report = self.expense_manager.get_expense_summary(self.current_user)
             
             # Rapor penceresi
             report_window = tk.Toplevel(self.root)
@@ -173,6 +145,20 @@ class FinanceApp:
             ttk.Label(frame, text=f"Toplam Gider: {report['total']:.2f} TL", 
                      font=("Helvetica", 12, "bold")).pack(pady=10)
             
+            ttk.Button(frame, text="Geri Dön", command=report_window.destroy).pack(pady=10)
+            
+        except ValueError as e:
+            messagebox.showerror("Hata", str(e))
+
+    def save_expense(self):
+        try:
+            category = self.expense_category.get()
+            amount = float(self.expense_amount.get())
+            description = self.expense_description.get()
+            
+            self.expense_manager.add_expense(self.current_user, category, amount, description)
+            messagebox.showinfo("Başarılı", "Gider başarıyla eklendi!")
+            self.show_main_menu()
         except ValueError as e:
             messagebox.showerror("Hata", str(e))
 
@@ -269,36 +255,8 @@ class FinanceApp:
         
         ttk.Label(frame, text="Gelir Raporu", font=("Helvetica", 16)).grid(row=0, column=0, columnspan=2, pady=10)
         
-        # Tarih aralığı seçimi
-        ttk.Label(frame, text="Başlangıç Tarihi:").grid(row=1, column=0, pady=5)
-        self.income_start_date = ttk.Entry(frame)
-        self.income_start_date.grid(row=1, column=1, pady=5)
-        
-        ttk.Label(frame, text="Bitiş Tarihi:").grid(row=2, column=0, pady=5)
-        self.income_end_date = ttk.Entry(frame)
-        self.income_end_date.grid(row=2, column=1, pady=5)
-        
-        ttk.Button(frame, text="Raporu Göster", command=self.display_income_report).grid(row=3, column=0, columnspan=2, pady=10)
-        ttk.Button(frame, text="Geri Dön", command=self.show_main_menu).grid(row=4, column=0, columnspan=2)
-
-    def save_income(self):
         try:
-            category = self.income_category.get()
-            amount = float(self.income_amount.get())
-            description = self.income_description.get()
-            
-            self.income_manager.add_income(self.current_user, category, amount, description)
-            messagebox.showinfo("Başarılı", "Gelir başarıyla eklendi!")
-            self.show_main_menu()
-        except ValueError as e:
-            messagebox.showerror("Hata", str(e))
-
-    def display_income_report(self):
-        try:
-            start_date = self.income_start_date.get() or None
-            end_date = self.income_end_date.get() or None
-            
-            report = self.income_manager.get_income_summary(self.current_user, start_date, end_date)
+            report = self.income_manager.get_income_summary(self.current_user)
             
             # Rapor penceresi
             report_window = tk.Toplevel(self.root)
@@ -318,6 +276,20 @@ class FinanceApp:
             ttk.Label(frame, text=f"Toplam Gelir: {report['total']:.2f} TL", 
                      font=("Helvetica", 12, "bold")).pack(pady=10)
             
+            ttk.Button(frame, text="Geri Dön", command=report_window.destroy).pack(pady=10)
+            
+        except ValueError as e:
+            messagebox.showerror("Hata", str(e))
+
+    def save_income(self):
+        try:
+            category = self.income_category.get()
+            amount = float(self.income_amount.get())
+            description = self.income_description.get()
+            
+            self.income_manager.add_income(self.current_user, category, amount, description)
+            messagebox.showinfo("Başarılı", "Gelir başarıyla eklendi!")
+            self.show_main_menu()
         except ValueError as e:
             messagebox.showerror("Hata", str(e))
 

@@ -1,5 +1,6 @@
 from datetime import datetime
 from database import Database
+from typing import Dict
 
 class ExpenseManager:
     def __init__(self, db):
@@ -31,30 +32,26 @@ class ExpenseManager:
         except ValueError as e:
             raise ValueError(f"Geçersiz gider bilgisi: {str(e)}")
 
-    def get_expense_summary(self, user_id, start_date=None, end_date=None):
-        """Belirli bir tarih aralığındaki giderleri özetler"""
-        try:
-            if start_date:
-                start_date = datetime.strptime(start_date, "%Y-%m-%d")
-            if end_date:
-                end_date = datetime.strptime(end_date, "%Y-%m-%d")
-            
-            expenses = self.db.get_expense_summary(user_id, start_date, end_date)
-            
-            # Kategori bazında toplam giderleri hesapla
-            total_by_category = {category: 0 for category in self.categories}
-            for category, amount in expenses:
-                total_by_category[category] = amount
-            
-            # Toplam gideri hesapla
-            total_expense = sum(total_by_category.values())
-            
-            return {
-                "by_category": total_by_category,
-                "total": total_expense
-            }
-        except ValueError as e:
-            raise ValueError(f"Tarih formatı hatalı: {str(e)}")
+    def get_expense_summary(self, user_id: int) -> Dict:
+        """Get summary of expenses by category."""
+        # Get all expense entries from database
+        expense_entries = self.db.get_expense_summary(user_id)
+        
+        # Calculate totals by category
+        category_totals = {}
+        for category, amount in expense_entries:
+            if category in category_totals:
+                category_totals[category] += amount
+            else:
+                category_totals[category] = amount
+        
+        # Calculate total
+        total = sum(category_totals.values())
+        
+        return {
+            'by_category': category_totals,
+            'total': total
+        }
 
     def get_categories(self):
         """Mevcut gider kategorilerini döndürür"""

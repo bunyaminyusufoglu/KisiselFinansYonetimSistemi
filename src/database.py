@@ -1,6 +1,7 @@
 import sqlite3
 import bcrypt
 from datetime import datetime
+from typing import List, Tuple
 
 class Database:
     def __init__(self, db_name="finance.db"):
@@ -158,38 +159,30 @@ class Database:
         conn.commit()
         conn.close()
 
-    def get_income_summary(self, user_id, start_date=None, end_date=None):
+    def get_income_summary(self, user_id: int) -> List[Tuple[str, float]]:
+        """Get all income entries for a user."""
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
-        
-        query = 'SELECT category, SUM(amount) FROM income WHERE user_id = ?'
-        params = [user_id]
-        
-        if start_date and end_date:
-            query += ' AND date BETWEEN ? AND ?'
-            params.extend([start_date, end_date])
-        
-        query += ' GROUP BY category'
-        
-        cursor.execute(query, params)
+        cursor.execute("""
+            SELECT category, SUM(amount) as total
+            FROM income
+            WHERE user_id = ?
+            GROUP BY category
+        """, (user_id,))
         results = cursor.fetchall()
         conn.close()
         return results
 
-    def get_expense_summary(self, user_id, start_date=None, end_date=None):
+    def get_expense_summary(self, user_id: int) -> List[Tuple[str, float]]:
+        """Get all expense entries for a user."""
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
-        
-        query = 'SELECT category, SUM(amount) FROM expenses WHERE user_id = ?'
-        params = [user_id]
-        
-        if start_date and end_date:
-            query += ' AND date BETWEEN ? AND ?'
-            params.extend([start_date, end_date])
-        
-        query += ' GROUP BY category'
-        
-        cursor.execute(query, params)
+        cursor.execute("""
+            SELECT category, SUM(amount) as total
+            FROM expenses
+            WHERE user_id = ?
+            GROUP BY category
+        """, (user_id,))
         results = cursor.fetchall()
         conn.close()
         return results 

@@ -1,5 +1,6 @@
 from datetime import datetime
 from database import Database
+from typing import Dict
 
 class IncomeManager:
     def __init__(self, db):
@@ -27,30 +28,26 @@ class IncomeManager:
         except ValueError as e:
             raise ValueError(f"Geçersiz gelir bilgisi: {str(e)}")
 
-    def get_income_summary(self, user_id, start_date=None, end_date=None):
-        """Belirli bir tarih aralığındaki gelirleri özetler"""
-        try:
-            if start_date:
-                start_date = datetime.strptime(start_date, "%Y-%m-%d")
-            if end_date:
-                end_date = datetime.strptime(end_date, "%Y-%m-%d")
-            
-            incomes = self.db.get_income_summary(user_id, start_date, end_date)
-            
-            # Kategori bazında toplam gelirleri hesapla
-            total_by_category = {category: 0 for category in self.categories}
-            for category, amount in incomes:
-                total_by_category[category] = amount
-            
-            # Toplam geliri hesapla
-            total_income = sum(total_by_category.values())
-            
-            return {
-                "by_category": total_by_category,
-                "total": total_income
-            }
-        except ValueError as e:
-            raise ValueError(f"Tarih formatı hatalı: {str(e)}")
+    def get_income_summary(self, user_id: int) -> Dict:
+        """Get summary of income by category."""
+        # Get all income entries from database
+        income_entries = self.db.get_income_summary(user_id)
+        
+        # Calculate totals by category
+        category_totals = {}
+        for category, amount in income_entries:
+            if category in category_totals:
+                category_totals[category] += amount
+            else:
+                category_totals[category] = amount
+        
+        # Calculate total
+        total = sum(category_totals.values())
+        
+        return {
+            'by_category': category_totals,
+            'total': total
+        }
 
     def get_categories(self):
         """Mevcut gelir kategorilerini döndürür"""
