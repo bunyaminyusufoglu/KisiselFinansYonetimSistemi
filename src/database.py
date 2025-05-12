@@ -185,4 +185,76 @@ class Database:
         """, (user_id,))
         results = cursor.fetchall()
         conn.close()
-        return results 
+        return results
+
+    def get_income_entries(self, user_id):
+        """Get all income entries for a user."""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT id, category, amount, description
+        FROM income
+        WHERE user_id = ?
+        ''', (user_id,))
+        results = cursor.fetchall()
+        conn.close()
+        return [{'id': row[0], 'category': row[1], 'amount': row[2], 'description': row[3]} for row in results]
+
+    def update_income(self, income_id, category, amount, description):
+        """Update an income entry."""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        UPDATE income
+        SET category = ?, amount = ?, description = ?
+        WHERE id = ?
+        ''', (category, amount, description, income_id))
+        conn.commit()
+        conn.close()
+
+    def delete_income(self, income_id):
+        """Delete an income entry."""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        DELETE FROM income
+        WHERE id = ?
+        ''', (income_id,))
+        conn.commit()
+        conn.close()
+
+    def get_expense_entries(self, user_id):
+        """Get all expense entries for a user."""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT id, category, amount, description
+        FROM expenses
+        WHERE user_id = ?
+        ''', (user_id,))
+        results = cursor.fetchall()
+        conn.close()
+        return [{'id': row[0], 'category': row[1], 'amount': row[2], 'description': row[3]} for row in results]
+
+    def update_expense(self, expense_id, category, amount, description):
+        """Update an expense entry."""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        UPDATE expenses
+        SET category = ?, amount = ?, description = ?
+        WHERE id = ?
+        ''', (category, amount, description, expense_id))
+        conn.commit()
+        conn.close()
+
+    def delete_expense(self, expense_id):
+        """Delete an expense entry."""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        DELETE FROM expenses
+        WHERE id = ?
+        ''', (expense_id,))
+        conn.commit()
+        conn.close() 
